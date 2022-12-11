@@ -19,7 +19,7 @@ fn main() {
     let stack8 = vec!["N", "D", "S"];
     let stack9 = vec!["D", "Z", "S", "F", "M"];
 
-    let mut crates = HashMap::from([
+    let crates = HashMap::from([
         (1, stack1),
         (2, stack2),
         (3, stack3),
@@ -31,6 +31,35 @@ fn main() {
         (9, stack9),
     ]);
 
+    part1(filename, crates);
+
+    let stack1 = vec!["F", "C", "J", "P", "H", "T", "W"];
+    let stack2 = vec!["G", "R", "V", "F", "Z", "J", "B", "H"];
+    let stack3 = vec!["H", "P", "T", "R"];
+    let stack4 = vec!["Z", "S", "N", "P", "H", "T"];
+    let stack5 = vec!["N", "V", "F", "Z", "H", "J", "D", "D"];
+    let stack6 = vec!["P", "M", "G", "F", "W", "D", "Z"];
+    let stack7 = vec!["M", "V", "Z", "W", "S", "J", "D", "P"];
+    let stack8 = vec!["N", "D", "S"];
+    let stack9 = vec!["D", "Z", "S", "F", "M"];
+    let stack10 = vec![""];
+
+    let crates = HashMap::from([
+        (1, stack1),
+        (2, stack2),
+        (3, stack3),
+        (4, stack4),
+        (5, stack5),
+        (6, stack6),
+        (7, stack7),
+        (8, stack8),
+        (9, stack9),
+    ]);
+
+    part2(filename, crates, stack10)
+}
+
+fn part1(filename: &str, mut crates: HashMap<i32, Vec<&str>>) {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
 
@@ -70,5 +99,54 @@ fn main() {
         }
     }
 
-    println!("{}", answer_a)
+    println!("answer 1: {}", answer_a);
+}
+
+fn part2<'a>(filename: &str, mut crates: HashMap<i32, Vec<&'a str>>, mut temp_stack: Vec<&'a str>) {
+    let file = File::open(filename).unwrap();
+    let reader = BufReader::new(file);
+
+    
+
+    for (_, line) in reader.lines().enumerate() {
+        let line = line.unwrap();
+        let re = Regex::new(r"(\d+).*(\d).*(\d)").unwrap();
+
+        for cap in re.captures_iter(&line) {
+            // println!("amount: {} from: {} to: {}", &cap[1], &cap[2], &cap[3]);
+
+            let amount: i32 = cap[1].parse().unwrap();
+            let from: i32 = cap[2].parse().unwrap();
+            let to: i32 = cap[3].parse().unwrap();
+
+            for _ in 0..amount {
+                let from_stack = crates.get_mut(&from);
+
+                if let Some(val) = from_stack {
+                    let crate_char = val.pop().unwrap();
+                    // println!("moving {}", crate_char.unwrap());
+                    temp_stack.push(crate_char);
+                }
+            }
+
+            for _ in 0..temp_stack.len()-1 {
+                // let crate_char = temp_stack.pop().unwrap();
+                let to_stack = crates.get_mut(&to);
+
+                if let Some(stack2) = to_stack {
+                    stack2.push(temp_stack.pop().unwrap());
+                }
+            }
+        }
+    }
+
+    let mut answer_a = "".to_owned();
+    for i in 1..10{
+        let temp_stack = crates.get_mut(&i);
+        if let Some(val3) = temp_stack {
+            answer_a.push_str(val3[val3.len()-1]);
+        }
+    }
+
+    println!("answer 2: {}", answer_a);
 }
